@@ -1,18 +1,24 @@
-import { getToPathname } from "react-router/lib/router";
 import { cart, Item } from "./cart";
 
 const stockItem = (item: Item): string => {
+  let saleText = item.discountPrice ? `${item.discountPrice}원 할인` : "";
+  const discountPrice = item.discountPrice || 0;
+
   return `<li>
- <h2>${item.name}</h2>
- <div>가격: ${item.price}</div>
- <div>수량: ${item.quantity}</div>
-</li>`;
+       <h2>${item.name}</h2>
+      <div>가격: ${item.price - discountPrice} ${saleText} </div>
+      <div>수량: ${item.quantity}</div>
+        </li>`;
 };
 
 const outOfStockItem = (item: Item): string => {
+  let saleText = item.discountPrice ? `${item.discountPrice}원 할인` : "";
+  const discountPrice = item.discountPrice || 0;
   return `<li class='gray'>
   <h2 >${item.name} (품절) </h2>
-  <div class='strike'>가격: ${item.price}</div>
+  <div class='strike'>가격: ${
+    item.price - discountPrice
+  } ${saleText}  (xx원 할인) </div>
   <div class='strike'>수량: ${item.quantity}</div>
 </li>`;
 };
@@ -37,13 +43,24 @@ const totalCalculator = (
 };
 
 const totalCount = (list: Array<Item>): string => {
-  const total = totalCalculator(list, (item) => item.quantity);
-  return `<h2>전체 수량: ${total}</h2>`;
+  const totalCount = totalCalculator(list, (item) => item.quantity);
+  return `<h2>전체 수량: ${totalCount}</h2>`;
 };
 
 const totalPrice = (list: Array<Item>): string => {
-  const total = totalCalculator(list, (item) => item.quantity * item.price);
-  return `<h2>전체 수량: ${total}</h2>`;
+  const totalPrice = totalCalculator(
+    list,
+    (item) => item.quantity * item.price
+  );
+
+  const totalDiscount = totalCalculator(list, (item) => {
+    const discountPrice = item.discountPrice || 0;
+    return discountPrice * item.quantity;
+  });
+
+  return `<h2>전체 수량: ${
+    totalPrice - totalDiscount
+  } (총 ${totalDiscount}원 할인)</h2>`;
 };
 
 const list = (list: Array<Item>): string => {
