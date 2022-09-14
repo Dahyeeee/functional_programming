@@ -1,9 +1,14 @@
 import { cart, Item } from "./cart";
+import * as O from "./option";
 
 const stockItem = (item: Item): string => {
-  let saleText = item.discountPrice ? `${item.discountPrice}원 할인` : "";
-  const discountPrice = item.discountPrice || 0;
+  const optionDiscountPrice = O.fromUndefined(item.discountPrice);
+  const discountPrice = O.getOrElse(optionDiscountPrice, 0);
 
+  let saleText = "";
+  if (O.isSome(optionDiscountPrice)) {
+    saleText = `(${discountPrice}원 할인)`;
+  }
   return `<li>
        <h2>${item.name}</h2>
       <div>가격: ${item.price - discountPrice} ${saleText} </div>
@@ -12,13 +17,16 @@ const stockItem = (item: Item): string => {
 };
 
 const outOfStockItem = (item: Item): string => {
-  let saleText = item.discountPrice ? `${item.discountPrice}원 할인` : "";
-  const discountPrice = item.discountPrice || 0;
+  const optionDiscountPrice = O.fromUndefined(item.discountPrice);
+  const discountPrice = O.getOrElse(optionDiscountPrice, 0);
+
+  let saleText = "";
+  if (O.isSome(optionDiscountPrice)) {
+    saleText = `(${discountPrice}원 할인)`;
+  }
   return `<li class='gray'>
   <h2 >${item.name} (품절) </h2>
-  <div class='strike'>가격: ${
-    item.price - discountPrice
-  } ${saleText}  (xx원 할인) </div>
+  <div class='strike'>가격: ${item.price - discountPrice} ${saleText}</div>
   <div class='strike'>수량: ${item.quantity}</div>
 </li>`;
 };
@@ -54,7 +62,7 @@ const totalPrice = (list: Array<Item>): string => {
   );
 
   const totalDiscount = totalCalculator(list, (item) => {
-    const discountPrice = item.discountPrice || 0;
+    const discountPrice = O.getOrElse(O.fromUndefined(item.discountPrice), 0);
     return discountPrice * item.quantity;
   });
 
